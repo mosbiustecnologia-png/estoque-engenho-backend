@@ -15,7 +15,7 @@ import uvicorn
 from database import SessionLocal, engine, init_db
 from models import Base
 from schemas import *
-from crud import *
+#from crud import *
 from utils.barcode_generator import gerar_codigo_barras, gerar_etiqueta_pdf
 from utils.qr_generator import gerar_qr_code
 
