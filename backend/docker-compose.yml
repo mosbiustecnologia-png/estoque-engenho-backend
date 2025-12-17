@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # Banco de dados MySQL
+  db:
+    image: mysql:8.0
+    container_name: estoque-engenho-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: estoque_engenho
+      MYSQL_USER: estoque_user
+      MYSQL_PASSWORD: estoque_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Backend
+  api:
+    build: .
+    container_name: estoque-engenho-api
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: estoque_user
+      DB_PASSWORD: estoque_pass
+      DB_NAME: estoque_engenho
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      API_DEBUG: "True"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  mysql_data:
